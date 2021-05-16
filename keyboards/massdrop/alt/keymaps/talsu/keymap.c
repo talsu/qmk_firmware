@@ -34,7 +34,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, KC_HOME, \
         CH_LANG, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,          KC_ENT,  KC_PGUP, \
         KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, LM(2,MOD_RSFT),   KC_UP,   KC_PGDN, \
-        KC_LCTL, KC_LGUI, KC_LALT,                            KC_SPC,                             MO(3),   MO(3),   KC_LEFT, KC_DOWN, KC_RGHT  \
+        KC_LCTL, KC_LGUI, KC_LALT,                            KC_SPC,                             MO(3),   MO(4),   KC_LEFT, KC_DOWN, KC_RGHT  \
     ),
     [1] = LAYOUT(
         _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
@@ -52,11 +52,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [3] = LAYOUT(
         KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,  KC_MUTE, \
-        L_T_BR,  L_PSD,   L_BRI,   L_PSI,   _______, _______, _______, _______, U_T_AGCR,MCR_ID,  MCR_PW,  KC_SLCK, KC_PAUS, KC_PSCR, KC_END,  \
-        L_T_PTD, L_PTP,   L_BRD,   L_PTN,   _______, _______, _______, _______, _______, MCR_ID_PW, _______, _______,        _______, KC_VOLU, \
+        _______, L_PSD,   L_BRI,   L_PSI,   _______, _______, _______, _______, U_T_AGCR,MCR_ID,  MCR_PW,  KC_SLCK, KC_PAUS, KC_PSCR, KC_END,  \
+        _______, L_PTP,   L_BRD,   L_PTN,   _______, _______, _______, _______, _______, MCR_ID_PW, _______, _______,        _______, KC_VOLU, \
         _______, L_T_MD,  L_T_ONF, _______, _______, MD_BOOT, NK_TOGG, _______, _______, DF(0),   DF(1),   _______,          KC_PGUP, KC_VOLD, \
         _______, _______, _______,                            _______,                            _______, _______, KC_HOME, KC_PGDN, KC_END   \
     ),
+    [4] = LAYOUT(
+        KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,  KC_MUTE, \
+        _______, L_PSD,   L_BRI,   L_PSI,   _______, _______, _______, _______, U_T_AGCR,MCR_ID,  MCR_PW,  KC_SLCK, KC_PAUS, KC_PSCR, KC_END,  \
+        _______, L_PTP,   L_BRD,   L_PTN,   _______, _______, _______, _______, _______, MCR_ID_PW, _______, _______,        _______, KC_VOLU, \
+        _______, L_T_MD,  L_T_ONF, _______, _______, MD_BOOT, NK_TOGG, _______, _______, DF(0),   DF(1),   _______,          KC_PGUP, KC_VOLD, \
+        _______, _______, _______,                            _______,                            _______, _______, KC_HOME, KC_PGDN, KC_END   \
+    ),
+
     /*
     [X] = LAYOUT(
         _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
@@ -71,6 +79,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #define MODS_SHIFT  (get_mods() & MOD_BIT(KC_LSHIFT) || get_mods() & MOD_BIT(KC_RSHIFT))
 #define MODS_CTRL  (get_mods() & MOD_BIT(KC_LCTL) || get_mods() & MOD_BIT(KC_RCTRL))
 #define MODS_ALT  (get_mods() & MOD_BIT(KC_LALT) || get_mods() & MOD_BIT(KC_RALT))
+
+void keyboard_pre_init_user(void) {
+    // Call the keyboard pre init code.
+    led_animation_id = 0; // init led animation : Rainbow scrolling
+    gcr_desired = LED_GCR_MAX; // init led bright : max
+}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint32_t key_timer;
@@ -194,7 +208,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 unregister_code(KC_F19);
                 unregister_code(KC_LANG1);
             }
-            return true;
+            return false;
         case MCR_ID_PW:
             if (record->event.pressed) {
                 send_string(idString);
@@ -202,17 +216,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 send_string(passwordString);
                 SEND_STRING(SS_TAP(X_ENTER));
             }
-            return true;
+            return false;
         case MCR_ID:
             if (record->event.pressed) {
                 send_string(idString);
             }
-            return true;
+            return false;
         case MCR_PW:
             if (record->event.pressed) {
                 send_string(passwordString);
             }
-            return true;
+            return false;
         default:
             return true; //Process all other keycodes normally
     }
@@ -226,7 +240,7 @@ led_instruction_t led_instructions[] = {
     //Examples are below
 
     //All LEDs use the user's selected pattern (this is the factory default)
-     { .flags = LED_FLAG_USE_ROTATE_PATTERN },
+    //  { .flags = LED_FLAG_USE_ROTATE_PATTERN },
 
     //Specific LEDs use the user's selected pattern while all others are off
     // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_ROTATE_PATTERN, .id0 = 0xFFFFFFFF, .id1 = 0xAAAAAAAA, .id2 = 0x55555555, .id3 = 0x11111111 },
@@ -253,6 +267,32 @@ led_instruction_t led_instructions[] = {
     //Edge uses active pattern (id3 105 -  96: 0000 0000 0000 0000 0000 0011 1111 1111 = 0x000003FF)
     // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_RGB, .id0 = 0xFFFFFFFF, .id1 = 0xFFFFFFFF, .id2 = 0x00000007, .r = 255 },
     // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_ROTATE_PATTERN , .id2 = 0xFFFFFFF8, .id3 = 0x000003FF },
+
+
+    // Default ROTATE PATTERN
+    { .flags = LED_FLAG_USE_ROTATE_PATTERN },
+
+    // Highlight Layer 3,4 Functions
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000001, .id1 = 0x00000000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 255, .g = 0, .b = 255, .layer = 2 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x40000000, .id1 = 0x00000000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 2 },
+
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x7CF8FFFF, .id1 = 0xFF9D9F7C, .id2 = 0x00000007, .id3 = 0x00000000, .r = 0, .g = 0, .b = 0, .layer = 3 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00050000, .id1 = 0x00020000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 0, .layer = 3 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00020000, .id1 = 0x00000001, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 181, .b = 0, .layer = 3 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x03000000, .id1 = 0x00000080, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 255, .layer = 3 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x80000000, .id1 = 0x00000002, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 242, .b = 0, .layer = 3 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00002000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 0, .g = 255, .b = 0, .layer = 3 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00004000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 255, .b = 255, .layer = 3 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00600000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 3 },
+
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x7CF8FFFF, .id1 = 0xFF9D9F7C, .id2 = 0x00000007, .id3 = 0x00000000, .r = 0, .g = 0, .b = 0, .layer = 4 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00050000, .id1 = 0x00020000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 255, .g = 0, .b = 0, .layer = 4 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00020000, .id1 = 0x00000001, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 181, .b = 0, .layer = 4 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x03000000, .id1 = 0x00000080, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 255, .layer = 4 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x80000000, .id1 = 0x00000002, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 242, .b = 0, .layer = 4 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00002000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 0, .layer = 4 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00004000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 255, .b = 255, .layer = 4 },
+{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00600000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 4 },
 
     //end must be set to 1 to indicate end of instruction set
      { .end = 1 }
