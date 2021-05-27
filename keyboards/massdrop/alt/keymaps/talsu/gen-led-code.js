@@ -1,15 +1,15 @@
 (datas => {
-    let prevKeyLayout = null
+    // let prevKeyLayout = null
     datas.forEach(data => {
-        if (prevKeyLayout) {
-            for (let i = 0; i < prevKeyLayout.length; ++i) {
-                if (data.keyLayout[i] === null || data.keyLayout[i] === ________) {
-                    data.keyLayout[i] = prevKeyLayout[i];
-                }
-            }
-        }
+        // if (prevKeyLayout) {
+        //     for (let i = 0; i < prevKeyLayout.length; ++i) {
+        //         if (data.keyLayout[i] === null || data.keyLayout[i] === ________) {
+        //             data.keyLayout[i] = prevKeyLayout[i];
+        //         }
+        //     }
+        // }
 
-        prevKeyLayout = data.keyLayout
+        // prevKeyLayout = data.keyLayout
 
         createConfig(data)
     })
@@ -39,29 +39,55 @@
     // },
 
     {
+        title: 'dev/tty',
+        flags: 'LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB',
+        layer: 0,
+        keyLayout: [
+            'FF0000', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF',
+            'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF',
+            'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF',           'FF0000', 'FFFFFF',
+            'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF',           'FFFFFF', 'FFFFFF',
+            'FFFFFF', 'FFFFFF', 'FFFFFF',                               'FFFFFF',                               'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF', 'FFFFFF'
+    ],
+        edgeLayout: [
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000'
+        ]
+    },
+    {
+        title: 'Mito Laser',
         flags: 'LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB',
         layer: 0,
         keyLayout: [
             'ff00a5', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff',
             '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff',
             '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff',           'ff00a5', '4200ff',
-            '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff',           '4200ff', '4200ff',
-            '4200ff', '4200ff', '4200ff',                               '4200ff',                               '4200ff', '4200ff', '4200ff', '4200ff', '4200ff'
+            '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff', '4200ff',           'ff00a5', '4200ff',
+            '4200ff', '4200ff', '4200ff',                               '4200ff',                               '4200ff', '4200ff', 'ff00a5', 'ff00a5', 'ff00a5'
     ],
         edgeLayout: [
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff', 'ff00a5',
-            '4200ff', 'ff00a5', '4200ff'
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000', '000000',
+            '000000', '000000', '000000'
         ]
     },
     {
+        title: 'Layer 2',
         flags: 'LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB',
         layer: 2,
         keyLayout: [
@@ -85,6 +111,7 @@
         ]
     },
     {
+        title: 'Layer 3',
         flags: 'LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB',
         layer: 3,
         keyLayout: [
@@ -108,14 +135,15 @@
         ]
     },
     {
+        title: 'Layer 4',
         flags: 'LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB',
         layer: 4,
         keyLayout: [
-            ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________,
-            ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________,
-            ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________,           ________, ________,
-            ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________, ________,           ________, ________,
-            ________, ________, ________,                               ________,                               ________, ________, ________, ________, ________
+            '000000', '000000', '000000', '000000', '000000', '000000', '000000', '000000', '000000', '000000', '000000', '000000', '000000', '000000', '000000',
+            '000000', 'FF0000', 'ffb500', 'FF0000', '000000', '000000', '000000', '000000', '000000', 'FF00FF', 'FF00FF', '000000', '000000', '000000', '000000',
+            '000000', 'fff200', 'ffb500', 'fff200', '000000', '000000', '000000', '000000', '000000', 'FF00FF', '000000', '000000',           '000000', '000000',
+            '000000', '00FF00', 'ffffff', '0000FF', '000000', 'FF0000', '000000', '000000', '000000', '00FFFF', '00FFFF', '000000',           '000000', '000000',
+            '000000', '000000', '000000',                               '000000',                               '000000', '000000', '000000', '000000', '000000'
         ],
         edgeLayout: [
             'FF0000', 'FF0000', 'FF0000', 'FF0000',
@@ -144,6 +172,7 @@ function createConfig(data) {
         colorMap.get(color).add(index)
     })
 
+    console.log(`    // ----${data.title}----`);
     colorMap.forEach((positions, color) => {
         let all = ''
         for (let i = 0;i < 128; ++i) {
@@ -155,7 +184,7 @@ function createConfig(data) {
         const id2Bin = all.substr(64, 32).split("").reverse().join("");
         const id3Bin = all.substr(96, 32).split("").reverse().join("");
 
-        console.log(`{ \
+        console.log(`    { \
 .flags = ${data.flags}, \
 .id0 = 0x${bin2hex(id0Bin)}, \
 .id1 = 0x${bin2hex(id1Bin)}, \

@@ -19,6 +19,10 @@ enum alt_keycodes {
     DBG_KBD,            //DEBUG Toggle Keyboard Prints                              //
     DBG_MOU,            //DEBUG Toggle Mouse Prints                                 //
     MD_BOOT,            //Restart into bootloader after hold timeout                //Working
+
+    L_I_N,              //LED instruction preset Next
+    L_I_P,              //LED instruciton preset Previous
+
     CH_LANG,            //맥 + Windows 한영 전환 (Mac은 F19)
     MCR_ID_PW,          //MACRO ID -> tab -> Password -> Enter
     MCR_ID,             //MACRO ID
@@ -26,8 +30,8 @@ enum alt_keycodes {
     MCR_CTS            //MACRO Mac 스크린샷 (영역)
 };
 
-const char idString[] = "";
-const char passwordString[] = "";
+const char idString[] = "<ID>";
+const char passwordString[] = "<Password>";
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
@@ -54,7 +58,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [3] = LAYOUT(
         KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,  KC_MUTE, \
         _______, L_PSD,   L_BRI,   L_PSI,   _______, _______, _______, _______, U_T_AGCR,MCR_ID,  MCR_PW,  KC_SLCK, KC_PAUS, KC_PSCR, KC_END,  \
-        _______, L_PTP,   L_BRD,   L_PTN,   _______, _______, _______, _______, _______, MCR_ID_PW, _______, _______,        _______, KC_VOLU, \
+        _______, L_I_P,   L_BRD,   L_I_N,   _______, _______, _______, _______, _______, MCR_ID_PW, _______, _______,        _______, KC_VOLU, \
         _______, L_T_MD,  L_T_ONF, MCR_CTS, _______, MD_BOOT, NK_TOGG, _______, _______, DF(0),   DF(1),   _______,          KC_PGUP, KC_VOLD, \
         _______, _______, _______,                            _______,                            _______, _______, KC_HOME, KC_PGDN, KC_END   \
     ),
@@ -80,12 +84,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #define MODS_SHIFT  (get_mods() & MOD_BIT(KC_LSHIFT) || get_mods() & MOD_BIT(KC_RSHIFT))
 #define MODS_CTRL  (get_mods() & MOD_BIT(KC_LCTL) || get_mods() & MOD_BIT(KC_RCTRL))
 #define MODS_ALT  (get_mods() & MOD_BIT(KC_LALT) || get_mods() & MOD_BIT(KC_RALT))
-
-void keyboard_pre_init_user(void) {
-    // Call the keyboard pre init code.
-    led_animation_id = 0; // init led animation : Rainbow scrolling
-    gcr_desired = LED_GCR_MAX; // init led bright : max
-}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint32_t key_timer;
@@ -233,81 +231,147 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 SEND_STRING(SS_LCTL(SS_LSFT(SS_LALT("4"))));
             }
             return false;
+        case L_I_N:
+            if (record->event.pressed) {
+                (led_instructions_id == led_instruction_count - 1) ? led_instructions_id = 0 : led_instructions_id++;
+                // set_led_animation_id(led_default_rotate_pattern[led_instruction_id]);
+            }
+            return false;
+        case L_I_P:
+            if (record->event.pressed) {
+                (led_instructions_id == 0) ? led_instructions_id = led_instruction_count - 1 : led_instructions_id--;
+                // set_led_animation_id(led_default_rotate_pattern[led_instruction_id]);
+            }
+            return false;
         default:
             return true; //Process all other keycodes normally
     }
 }
 
-led_instruction_t led_instructions[] = {
-    //LEDs are normally inactive, no processing is performed on them
-    //Flags are used in matching criteria for an LED to be active and indicate how to color it
-    //Flags can be found in tmk_core/protocol/arm_atsam/md_rgb_matrix.h (prefixed with LED_FLAG_)
-    //LED IDs can be found in config_led.h in the keyboard's directory
-    //Examples are below
+led_instruction_t led_instructions_common[] = {
 
-    //All LEDs use the user's selected pattern (this is the factory default)
-    //  { .flags = LED_FLAG_USE_ROTATE_PATTERN },
+    // ----Layer 2----
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000001, .id1 = 0x00000000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 255, .g = 0, .b = 255, .layer = 2 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x40000000, .id1 = 0x00000000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 2 },
 
-    //Specific LEDs use the user's selected pattern while all others are off
-    // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_ROTATE_PATTERN, .id0 = 0xFFFFFFFF, .id1 = 0xAAAAAAAA, .id2 = 0x55555555, .id3 = 0x11111111 },
+    // ----Layer 3----
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x7CF8FFFF, .id1 = 0xFF9D1F7C, .id2 = 0x00000007, .id3 = 0x00000000, .r = 0, .g = 0, .b = 0, .layer = 3 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00050000, .id1 = 0x00020000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 0, .layer = 3 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00020000, .id1 = 0x00000001, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 181, .b = 0, .layer = 3 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x03000000, .id1 = 0x00000080, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 255, .layer = 3 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x80000000, .id1 = 0x00000002, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 242, .b = 0, .layer = 3 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00002000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 0, .g = 255, .b = 0, .layer = 3 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00004000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 255, .b = 255, .layer = 3 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00008000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 0, .b = 255, .layer = 3 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00600000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 3 },
 
-    //Specific LEDs use specified RGB values while all others are off
-    // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_RGB, .id0 = 0xFF, .id1 = 0x00FF, .id2 = 0x0000FF00, .id3 = 0xFF000000, .r = 75, .g = 150, .b = 225 },
-
-    //All LEDs use the user's selected pattern
-    //On layer 1, all key LEDs (except the top row which keeps active pattern) are red while all edge LEDs are green
-    //When layer 1 is active, key LEDs use red    (id0  32 -  16: 1111 1111 1111 1111 1000 0000 0000 0000 = 0xFFFF8000) (except top row 15 - 1)
-    //When layer 1 is active, key LEDs use red    (id1  64 -  33: 1111 1111 1111 1111 1111 1111 1111 1111 = 0xFFFFFFFF)
-    //When layer 1 is active, key LEDs use red    (id2  67 -  65: 0000 0000 0000 0000 0000 0000 0000 0111 = 0x00000007)
-    //When layer 1 is active, edge LEDs use green (id2  95 -  68: 1111 1111 1111 1111 1111 1111 1111 1000 = 0xFFFFFFF8)
-    //When layer 1 is active, edge LEDs use green (id3 105 -  96: 0000 0000 0000 0000 0000 0011 1111 1111 = 0x000003FF)
-    // { .flags = LED_FLAG_USE_ROTATE_PATTERN },
-    // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0xFFFF8000, .id1 = 0xFFFFFFFF, .id2 = 0x00000007, .r = 255, .layer = 1 },
-    // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .g = 127, .layer = 1 },
-
-    //All key LEDs use red while edge LEDs use the active pattern
-    //All key LEDs use red     (id0  32 -   1: 1111 1111 1111 1111 1111 1111 1111 1111 = 0xFFFFFFFF)
-    //All key LEDs use red     (id1  64 -  33: 1111 1111 1111 1111 1111 1111 1111 1111 = 0xFFFFFFFF)
-    //All key LEDs use red     (id2  67 -  65: 0000 0000 0000 0000 0000 0000 0000 0111 = 0x00000007)
-    //Edge uses active pattern (id2  95 -  68: 1111 1111 1111 1111 1111 1111 1111 1000 = 0xFFFFFFF8)
-    //Edge uses active pattern (id3 105 -  96: 0000 0000 0000 0000 0000 0011 1111 1111 = 0x000003FF)
-    // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_RGB, .id0 = 0xFFFFFFFF, .id1 = 0xFFFFFFFF, .id2 = 0x00000007, .r = 255 },
-    // { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_ROTATE_PATTERN , .id2 = 0xFFFFFFF8, .id3 = 0x000003FF },
-
-
-    // Default ROTATE PATTERN
-    { .flags = LED_FLAG_USE_ROTATE_PATTERN },
-
-    // For Layer 0
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000001, .id1 = 0x00000400, .id2 = 0x55555550, .id3 = 0x00000155, .r = 255, .g = 0, .b = 165, .layer = 0 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0xFFFFFFFE, .id1 = 0xFFFFFBFF, .id2 = 0xAAAAAAAF, .id3 = 0x000002AA, .r = 66, .g = 0, .b = 255, .layer = 0 },
-
-    // Highlight Layer 3,4 Functions
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000001, .id1 = 0x00000000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 255, .g = 0, .b = 255, .layer = 2 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0xBFFFFFFE, .id1 = 0xFFFFFBFF, .id2 = 0x00000007, .id3 = 0x00000000, .r = 66, .g = 0, .b = 255, .layer = 2 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x40000000, .id1 = 0x00000000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 2 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00000400, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 165, .layer = 2 },
-
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x7CF8FFFF, .id1 = 0xFF9D1F7C, .id2 = 0x00000007, .id3 = 0x00000000, .r = 0, .g = 0, .b = 0, .layer = 3 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00050000, .id1 = 0x00020000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 0, .layer = 3 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00020000, .id1 = 0x00000001, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 181, .b = 0, .layer = 3 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x03000000, .id1 = 0x00000080, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 255, .layer = 3 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x80000000, .id1 = 0x00000002, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 242, .b = 0, .layer = 3 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00002000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 0, .g = 255, .b = 0, .layer = 3 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00004000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 255, .b = 255, .layer = 3 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00008000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 0, .b = 255, .layer = 3 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00600000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 3 },
-
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x7CF8FFFF, .id1 = 0xFF9D1F7C, .id2 = 0x00000007, .id3 = 0x00000000, .r = 0, .g = 0, .b = 0, .layer = 4 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00050000, .id1 = 0x00020000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 255, .g = 0, .b = 0, .layer = 4 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00020000, .id1 = 0x00000001, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 181, .b = 0, .layer = 4 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x03000000, .id1 = 0x00000080, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 255, .layer = 4 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x80000000, .id1 = 0x00000002, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 242, .b = 0, .layer = 4 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00002000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 0, .layer = 4 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00004000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 255, .b = 255, .layer = 4 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00008000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 0, .b = 255, .layer = 4 },
-{ .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00600000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 4 },
+    // ----Layer 4----
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x7CF8FFFF, .id1 = 0xFF9D1F7C, .id2 = 0x00000007, .id3 = 0x00000000, .r = 0, .g = 0, .b = 0, .layer = 4 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00050000, .id1 = 0x00020000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .r = 255, .g = 0, .b = 0, .layer = 4 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00020000, .id1 = 0x00000001, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 181, .b = 0, .layer = 4 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x03000000, .id1 = 0x00000080, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 255, .layer = 4 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x80000000, .id1 = 0x00000002, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 242, .b = 0, .layer = 4 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00002000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 0, .layer = 4 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00004000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 255, .b = 255, .layer = 4 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00008000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 0, .b = 255, .layer = 4 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000000, .id1 = 0x00600000, .id2 = 0x00000000, .id3 = 0x00000000, .r = 0, .g = 255, .b = 255, .layer = 4 },
 
     //end must be set to 1 to indicate end of instruction set
      { .end = 1 }
 };
+
+
+led_instruction_t led_instructions_dev_tty[] = {
+
+    // For Layer 0
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0x00000001, .id1 = 0x00000400, .id2 = 0x00000000, .id3 = 0x00000000, .r = 255, .g = 0, .b = 0, .layer = 0 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_MATCH_LAYER | LED_FLAG_USE_RGB, .id0 = 0xFFFFFFFE, .id1 = 0xFFFFFBFF, .id2 = 0x00000007, .id3 = 0x00000000, .r = 255, .g = 255, .b = 255, .layer = 0 },
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_PATTERN, .id0 = 0x00000000, .id1 = 0x00000000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .pattern_id = 8},
+
+    //end must be set to 1 to indicate end of instruction set
+     { .end = 1 }
+};
+
+led_instruction_t led_instructions_mito_laser[] = {
+
+    // For Layer 0
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_RGB, .id0 = 0x00000001, .id1 = 0x01000400, .id2 = 0x00000007, .id3 = 0x00000000, .r = 255, .g = 0, .b = 165},
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_RGB, .id0 = 0xFFFFFFFE, .id1 = 0xFEFFFBFF, .id2 = 0x00000000, .id3 = 0x00000000, .r = 66, .g = 0, .b = 255},
+    { .flags = LED_FLAG_MATCH_ID | LED_FLAG_USE_PATTERN, .id0 = 0x00000000, .id1 = 0x00000000, .id2 = 0xFFFFFFF8, .id3 = 0x000003FF, .pattern_id = 10},
+
+    //end must be set to 1 to indicate end of instruction set
+     { .end = 1 }
+};
+
+
+led_instruction_t led_instructions_default[] = {
+
+    // Default ROTATE PATTERN
+    { .flags = LED_FLAG_USE_ROTATE_PATTERN },
+    { .end = 1 }
+};
+
+
+void *led_instructions_list[] = {
+    led_instructions_dev_tty,
+    led_instructions_mito_laser,
+    led_instructions_default
+};
+
+
+uint8_t get_led_ins_array_size(led_instruction_t* cur) {
+    uint8_t size = 0;
+    while (!cur->end) {
+        cur++;
+        size++;
+    }
+
+    return size;
+}
+
+const uint8_t led_instruction_count = sizeof(led_instructions_list) / sizeof(led_instructions_list[0]);
+
+
+uint8_t is_led_instruction_ready = 0;
+void init_led_instruction(void) {
+    // run only one time.
+    if (is_led_instruction_ready) return;
+    is_led_instruction_ready = 1;
+
+    // append common instructions.
+    uint8_t common_array_size = get_led_ins_array_size(led_instructions_common);
+    for (int i = 0;i < led_instruction_count; ++i) {
+        led_instruction_t *cur = led_instructions_list[i];
+        uint8_t array_size = get_led_ins_array_size(cur);
+        uint8_t mergedSize = array_size + common_array_size + 1;
+        led_instruction_t* merged = (led_instruction_t*) malloc(sizeof(led_instruction_t) * mergedSize);
+
+        for (int j = 0;j < array_size; ++j) {
+            merged[j] = cur[j];
+        }
+
+        for (int j = 0;j < common_array_size + 1; ++j) {
+            merged[j + array_size] = led_instructions_common[j];
+        }
+
+        led_instructions_list[i] = merged;
+    }
+}
+
+void matrix_init_user(void) {
+    //Set which from led_instructions_list should be default
+    // uint8_t index = 0;    // led_instructions_pleasuretek  is position 0 in led_instructions_list  -- change this number to match in led_instructions_list to set default
+    // led_instruction_id = index;
+    // set_led_animation_id(led_default_rotate_pattern[index]);
+    // led_animation_orientation = LED_SCROLL_CENT;
+
+    init_led_instruction();
+    led_animation_id = 0; // init led animation : Rainbow scrolling
+    gcr_desired = LED_GCR_MAX; // init led bright : max
+}
+
+void keyboard_pre_init_user(void) {
+    // Call the keyboard pre init code.
+    // led_animation_id = 0; // init led animation : Rainbow scrolling
+    // gcr_desired = LED_GCR_MAX; // init led bright : max
+}

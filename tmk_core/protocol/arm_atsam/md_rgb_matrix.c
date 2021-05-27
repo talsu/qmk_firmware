@@ -341,6 +341,12 @@ uint8_t led_lighting_mode         = LED_MODE_NORMAL;
 uint8_t led_enabled               = 1;
 uint8_t led_animation_breathe_cur = BREATHE_MIN_STEP;
 uint8_t breathe_dir               = 1;
+uint8_t led_instructions_id       = 0;
+
+__attribute__((weak))
+led_instruction_t led_instructions_default[] = { { .end = 1 } };
+__attribute__((weak))
+void *led_instructions_list[] = {led_instructions_default};
 
 static void led_run_pattern(led_setup_t* f, float* ro, float* go, float* bo, float pos) {
     float po;
@@ -414,7 +420,7 @@ static void md_rgb_matrix_config_override(int i) {
     } else if (led_lighting_mode == LED_MODE_INDICATORS_ONLY) {
         // Do not act on this LED (Only show indicators)
     } else {
-        led_instruction_t* led_cur_instruction = led_instructions;
+        led_instruction_t* led_cur_instruction = led_instructions_list[led_instructions_id];
         while (!led_cur_instruction->end) {
             // Check if this applies to current layer
             if ((led_cur_instruction->flags & LED_FLAG_MATCH_LAYER) && (led_cur_instruction->layer != highest_active_layer)) {

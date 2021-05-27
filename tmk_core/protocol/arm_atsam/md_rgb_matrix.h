@@ -147,6 +147,10 @@ extern uint8_t led_animation_breathe_cur;
 extern uint8_t led_animation_direction;
 extern uint8_t breathe_dir;
 
+extern void *led_instructions_list[];
+extern uint8_t led_instructions_id;
+extern const uint8_t led_instruction_count;
+
 #    define LED_MODE_NORMAL 0  // Must be 0
 #    define LED_MODE_KEYS_ONLY 1
 #    define LED_MODE_NON_KEYS_ONLY 2
