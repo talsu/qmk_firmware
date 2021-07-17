@@ -30,8 +30,8 @@ enum alt_keycodes {
     MCR_CTS            //MACRO Mac 스크린샷 (영역)
 };
 
-const char idString[] = "<ID>";
-const char passwordString[] = "<Password>";
+const char idString[] = "hyoungjkim";
+const char passwordString[] = "LIVEdevil4$WHSSK";
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
